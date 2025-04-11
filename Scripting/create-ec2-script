@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# AWS Region jahan EC2 instance create karna hai
+REGION="eu-north-1"
+
+# EC2 instance ka naam
+INSTANCE_NAME="MyEC2Instance"
+
+# EC2 instance ke liye AMI ID (Amazon Machine Image)
+AMI_ID="ami-0274f4b62b6ae3bd5"  
+
+# EC2 instance ka instance type
+INSTANCE_TYPE="t3.micro"
+
+# Key pair ka naam
+KEY_NAME="two-tier-app-k8s" 
+
+# Security group ka ID
+SECURITY_GROUP="sg-06fcdc17344828b9f" 
+
+# EC2 instance ko create karna
+INSTANCE_ID=$(aws ec2 run-instances \
+  --image-id $AMI_ID \
+  --instance-type $INSTANCE_TYPE \
+  --key-name $KEY_NAME \
+  --security-group-ids $SECURITY_GROUP \
+  --region $REGION \
+  --query 'Instances[0].InstanceId' \
+  --output text)
+
+# Instance create hone tak wait karna
+echo "EC2 instance $INSTANCE_ID create ho raha hai..."
+
+# Instance ka public IP address fetch karna
+PUBLIC_IP=$(aws ec2 describe-instances \
+  --instance-ids $INSTANCE_ID \
+  --query 'Reservations[0].Instances[0].PublicIpAddress' \
+  --region $REGION \
+  --output text)
+
+# Jab tak public IP address available nahi hota, tab tak wait karna
+while [ "$PUBLIC_IP" == "None" ]; do
+  echo "Public IP address abhi tak available nahi hai. Wait kar rahe hain..."
+  sleep 10
+  PUBLIC_IP=$(aws ec2 describe-instances \
+    --instance-ids $INSTANCE_ID \
+    --query 'Reservations[0].Instances[0].PublicIpAddress' \
+    --region $REGION \
+    --output text)
+done
+
+echo "EC2 instance ka public IP address: $PUBLIC_IP"
