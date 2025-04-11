@@ -1,4 +1,4 @@
-# Terraform EC2 Automation with Shell Script & GitHub Actions
+# Terraform EC2 Automation with Shell Script & GitHub Actions CI/CD
 
 This project demonstrates how to create a Terraform module for provisioning an EC2 instance, integrate it with a shell script, and fully automate the deployment process using GitHub Actions.
 
